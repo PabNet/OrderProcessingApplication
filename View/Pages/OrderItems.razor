@@ -1,0 +1,153 @@
+﻿@page "/orderItems"
+
+@layout TableLayout
+
+@inherits TableLayout
+
+@inject IGenericRepository<OrderItem> _orderItemRepository
+@inject IGenericRepository<Order> _orderRepository
+
+@code
+{
+    [Parameter]
+    [SupplyParameterFromQuery(Name = ViewConstantStorage.Parameters.OrderId)]
+    public string? OrderId { get; set; }
+
+    private double MaxQuantity { get; set; } = 10000000000000000000;
+    private double MinQuantity { get; set; } = 0;
+
+    private uint IntegerOrderId => Convert.ToUInt32(OrderId);
+
+    private List<OrderItem>? OrderItemList { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        OrderItemList = _orderItemRepository.Get(o => o.Order.Id == IntegerOrderId && o.Quantity > MinQuantity && o.Quantity < MaxQuantity).ToList();
+
+        StateHasChanged();
+
+        NameList = string.Format(ViewConstantStorage.PageParts.OrderItemPartOfTitle,
+            's',
+            _orderRepository.Get(o => o.Id == IntegerOrderId).First().Number);
+        FormPageName = $"{ViewConstantStorage.Pages.OrderItemForm}?{ViewConstantStorage.Parameters.OrderId}={OrderId}";
+
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ExecuteActionsAsync(ErrorType.BrowserStorage, async delegate
+            {
+                await SaveListToBrowserStorage(new Dictionary<string, string>
+                {
+                    [ViewConstantStorage.BrowserStorageParameterKeys.NameList] = NameList!,
+                    [ViewConstantStorage.BrowserStorageParameterKeys.FormPageName] = FormPageName!
+                });
+            });
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task RemoveEntry(uint id)
+    {
+        var removingOrderItem = await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            var orderItem = _orderItemRepository.Get(o => o.Id == id).First();
+            _orderItemRepository.Remove(orderItem);
+
+            return orderItem;
+        });
+        
+        OrderItemList?.Remove(removingOrderItem!);
+
+        StateHasChanged();
+    }
+
+    private async Task ChangeQuantityFilter(AmountFilterType amountFilterType, string? amount)
+    {
+        switch (amountFilterType)
+        {
+            case AmountFilterType.Max:
+            {
+                MaxQuantity = string.IsNullOrWhiteSpace(amount) ? 10000000000000000000 : Convert.ToDouble(amount);
+                    
+                break;
+            }
+            case AmountFilterType.Min:
+            {
+                MinQuantity = string.IsNullOrWhiteSpace(amount) ? 0 : Convert.ToDouble(amount);
+                    
+                break;
+            }
+        }
+            
+        OrderItemList = await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            return _orderItemRepository.Get(o => o.Quantity >= MinQuantity && o.Quantity <= MaxQuantity).ToList();
+        });
+            
+        StateHasChanged();
+    }
+}
+
+<PageTitle>Order items</PageTitle>
+
+<div class="card-body">
+    <div id="filterBlock">
+        <div class="form-group w-25 mx-2">
+            <label for="min" class="m-2">Minimal quantity</label>
+            <input id="min" min="0" value="0" type="number" class="form-control" @onchange="@(e => ChangeQuantityFilter(AmountFilterType.Min, e.Value?.ToString()))">
+        </div>
+        <div class="form-group w-25 mx-2" style="float: right">
+            <label for="max" class="m-2">Maximum quantity</label>
+            <input id="max" min="0" value="10000000000000000000" type="number" class="form-control" @onchange="@(e => ChangeQuantityFilter(AmountFilterType.Max, e.Value?.ToString()))">
+        </div>
+    </div>
+    <br>
+    <table id="dataTable">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th data-sortable="false">Actions</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th data-sortable="false">Actions</th>
+        </tr>
+        </tfoot>
+        <tbody>
+        @if (OrderItemList is not null && OrderItemList.Count > 0)
+        {
+            @foreach (var orderItem in OrderItemList)
+            {
+                <tr>
+                    <td>@orderItem.Id</td>
+                    <td>@orderItem.Name</td>
+                    <td>@orderItem.Quantity</td>
+                    <td>@orderItem.Unit</td>
+                    <td>
+                        <a class="action-link"
+                           @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItemForm}?{ViewConstantStorage.Parameters.Id}={orderItem.Id}&{ViewConstantStorage.Parameters.OrderId}={OrderId}"))">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="action-link" @onclick="@(() => RemoveEntry(orderItem.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>

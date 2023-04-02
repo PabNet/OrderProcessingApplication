@@ -1,0 +1,38 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace OrderProcessingApplication.View.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    
+    <link rel="shortcut icon" href="images/orderIcon.png" type="image/png">
+    
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link href="lib/dataTables/datatables.min.css" rel="stylesheet"/>
+    <link href="lib/select/css/bootstrap-select.min.css" rel="stylesheet"/>
+    <link href="css/site.css" rel="stylesheet"/>
+
+    <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    <script src="lib/jquery/dist/jquery.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="lib/dataTables/datatables.min.js"></script>
+    <script src="lib/moment/moment-with-locales.min.js"></script>
+    <script src="lib/select/js/bootstrap-select.min.js"></script>
+    <script src="lib/chart/Chart.min.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/site.js"></script>
+
+    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
+    
+</head>
+<body class="sb-nav-fixed">
+
+@RenderBody()
+
+<script src="_framework/blazor.server.js"></script>
+
+</body>
+</html>

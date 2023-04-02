@@ -1,0 +1,15 @@
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\bin\Debug\net6.0\Domain.deps.json
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\bin\Debug\net6.0\Domain.dll
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\bin\Debug\net6.0\Domain.pdb
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\bin\Debug\net6.0\DTO.dll
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\bin\Debug\net6.0\DTO.pdb
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.csproj.AssemblyReference.cache
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.AssemblyInfoInputs.cache
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.AssemblyInfo.cs
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.csproj.CoreCompileInputs.cache
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.csproj.CopyComplete
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.dll
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\refint\Domain.dll
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\Domain.pdb
+D:\Developed_Projects\Rider\OrderProcessingApplication\Domain\obj\Debug\net6.0\ref\Domain.dll

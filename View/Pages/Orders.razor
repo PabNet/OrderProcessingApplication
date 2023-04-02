@@ -1,0 +1,196 @@
+﻿@page "/orders"
+
+@layout TableLayout
+
+@inherits TableLayout
+
+@inject IGenericRepository<Order> _orderRepository
+@inject IGenericRepository<Provider> _providerRepository
+
+@code
+{
+    private DateTime StartDate { get; set; }
+    private DateTime EndDate { get; set; }
+
+    private List<Order>? OrderList { get; set; }
+
+    private List<Provider>? ProviderList { get; set; }
+
+    private List<uint> SelectedProviderIds { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        ProviderList = _providerRepository.Get().ToList();
+        OrderList = _orderRepository.Get().ToList();
+
+        StateHasChanged();
+
+        NameList = ViewConstantStorage.Pages.Orders.Remove(0, 1);
+        FormPageName = ViewConstantStorage.Pages.OrderForm;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ExecuteActionsAsync(ErrorType.BrowserStorage, async delegate
+            {
+                await SaveListToBrowserStorage(new Dictionary<string, string>
+                {
+                    [ViewConstantStorage.BrowserStorageParameterKeys.NameList] = NameList!,
+                    [ViewConstantStorage.BrowserStorageParameterKeys.FormPageName] = FormPageName!
+                });
+            });
+
+            var dates = await ExecuteActionsAsync(ErrorType.Js, async delegate
+            {
+                await InvokeJsMethod(ViewConstantStorage.JsMethods.InitializeMultipleSelect);
+
+                return await GetDataFromJs<string[]>(ViewConstantStorage.JsMethods.InitializeDateTimePickers);
+            });
+
+            if (dates is not null && dates.Length > 0)
+            {
+                (StartDate, EndDate) = (DateTime.Parse(dates[0]), DateTime.Parse(dates[1]));
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task RemoveEntry(uint id)
+    {
+        var removingOrder = await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            var order = _orderRepository.Get(o => o.Id == id).First();
+            _orderRepository.CreateOrUpdate(order!, o => order.Id == id);
+
+            return order;
+        });
+        
+        OrderList?.Remove(removingOrder!);
+
+        StateHasChanged();
+    }
+
+    private async Task<List<Order>?> GetOrderListWithFilters()
+    {
+        return await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            return _orderRepository.Get(o => o.Date > StartDate &&
+                                                  o.Date < EndDate && 
+                                                  (SelectedProviderIds.Count == default || SelectedProviderIds.Any(p=>p == o.Provider?.Id)))
+                                    .ToList();
+        });
+    }
+
+    private async Task ChangeDateFilter(DateFilterType dateFilterType, string? dateValue)
+    {
+        if (!string.IsNullOrWhiteSpace(dateValue))
+        {
+            var date = DateTime.Parse(dateValue);
+
+            switch (dateFilterType)
+            {
+                case DateFilterType.Start:
+                {
+                    StartDate = date;
+
+                    break;
+                }
+                case DateFilterType.End:
+                {
+                    EndDate = date;
+
+                    break;
+                }
+            }
+
+            OrderList = await GetOrderListWithFilters();
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task ChangeProviderFilter(string[]? selectedProviders)
+    {
+        if (selectedProviders is not null)
+        {
+            SelectedProviderIds = selectedProviders.Select(s=>Convert.ToUInt32(s)).ToList();
+
+            OrderList = await GetOrderListWithFilters();
+
+            StateHasChanged();
+        }
+    }
+}
+
+<PageTitle>Orders</PageTitle>
+
+<div class="card-body">
+    <div id="filterBlock">
+        <div class="form-group w-25 mx-2">
+            <label for="startDate" class="m-2">Start Date</label>
+            <input id="startDate" type="datetime-local" class="form-control" @onchange="@(e => ChangeDateFilter(DateFilterType.Start, e.Value?.ToString()))">
+        </div>
+        <div class="form-group w-25 mx-2" style="float: right">
+            <label for="endDate" class="m-2">End Date</label>
+            <input id="endDate" type="datetime-local" class="form-control" @onchange="@(e => ChangeDateFilter(DateFilterType.End, e.Value?.ToString()))">
+        </div>
+    </div>
+    <div class="form-group w-50 mx-2">
+        <label for="selectProvider" class="m-2">Choose Providers</label><br>
+        <select id="selectProvider" class="selectpicker w-50" multiple @onchange="@(e => ChangeProviderFilter(e.Value as string[]))">
+            @if (ProviderList is not null && ProviderList.Count > 0)
+            {
+                @foreach (var provider in ProviderList)
+                {
+                    <option value="@provider.Id">@provider.Name</option>
+                }
+            }
+        </select>
+    </div>
+    <br>
+    <table id="dataTable">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Number</th>
+            <th>Date</th>
+            <th>Provider</th>
+            <th data-sortable="false">Actions</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>#</th>
+            <th>Number</th>
+            <th>Date</th>
+            <th>Provider</th>
+            <th data-sortable="false">Actions</th>
+        </tr>
+        </tfoot>
+        <tbody>
+        @if (OrderList is not null && OrderList.Count > 0)
+        {
+            @foreach (var order in OrderList)
+            {
+                <tr class="orderRow" @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={order.Id}"))">
+                    <td>@order.Id</td>
+                    <td>@order.Number</td>
+                    <td>@order.Date</td>
+                    <td>@order.Provider?.Name</td>
+                    <td>
+                        <a class="action-link" @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderForm}?{ViewConstantStorage.Parameters.Id}={order.Id}"))">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="action-link" @onclick="@(() => RemoveEntry(order.Id))">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>

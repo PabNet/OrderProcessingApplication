@@ -1,0 +1,75 @@
+﻿@page "/orderItemForm"
+
+@layout FormLayout
+
+@inherits FormLayout
+
+@inject IGenericRepository<OrderItem> _orderItemRepository
+@inject IGenericRepository<Order> _orderRepository
+
+@code
+{
+    [Parameter]
+    [SupplyParameterFromQuery(Name = ViewConstantStorage.Parameters.OrderId)]
+    public string? OrderId { get; set; }
+
+    private OrderItem OrderItem { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        OrderItem = Id == default ? new OrderItem() : _orderItemRepository.Get(o => o.Id == IntegerId).First();
+        
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var isAddMode = Id == default;
+            var partOfTitle = string.Format(ViewConstantStorage.PageParts.OrderItemPartOfTitle,
+                string.IsNullOrWhiteSpace(OrderItem?.Name) ? string.Empty : $" {OrderItem.Name}",
+                _orderRepository.Get(o=>o.Id == Convert.ToUInt32(OrderId)).First().Number);
+            
+            await InitializeFormData(isAddMode, partOfTitle);
+        }
+        
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task ProcessButtonClick()
+    {
+        await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            var order = _orderRepository.Get(p => p.Id == Convert.ToUInt32(OrderId)).First();
+            OrderItem.Order = order;
+
+            if (OrderItem.Name == OrderItem.Order.Number)
+            {
+                throw new Exception(ViewConstantStorage.Replicas.OrderItemErrorDescription);
+            }
+        
+            _orderItemRepository.CreateOrUpdate(OrderItem!, orderItem => orderItem.Id == IntegerId);
+        });
+        
+        TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={OrderId}");
+    }
+}
+
+<div class="form-floating mb-3">
+    <input class="form-control" id="inputName" type="text" @bind-value="@OrderItem.Name"/>
+    <label for="inputName">Name</label>
+</div>
+<div class="form-floating mb-3">
+    <input class="form-control" id="inputDate" type="number" @bind-value="@OrderItem.Quantity"/>
+    <label for="inputDate">Quantity</label>
+</div>
+<div class="form-floating mb-3">
+    <input class="form-control" id="inputUnit" type="text" @bind-value="@OrderItem.Unit"/>
+    <label for="inputUnit">Unit</label>
+</div>
+<div class="mt-4 mb-0">
+    <div class="d-grid">
+        <a class="btn btn-dark btn-block" @onclick="ProcessButtonClick">@EventType</a>
+    </div>
+</div>

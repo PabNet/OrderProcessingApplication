@@ -1,0 +1,53 @@
+﻿@code
+{
+    [Parameter]
+    public string? StatusCode { get; set; }
+    
+    private string? Title { get; set; }
+    
+    private string? Subtitle { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var errorType = Convert.ToUInt32(StatusCode).ToEnum<HttpStatusCode>();
+        Title = errorType.ToString();
+        
+        switch (errorType)
+        {
+            case HttpStatusCode.NotFound:
+            {
+                Subtitle = ViewConstantStorage.Replicas.NotFoundSubtitle;
+                
+                break;
+            }
+            default:
+            {
+                Subtitle = ViewConstantStorage.Replicas.UnknownErrorSubtitle;
+                Title = ViewConstantStorage.PageParts.UnknownErrorTitle;
+                
+                break;
+            }
+        }
+
+        StateHasChanged();
+        
+        base.OnParametersSet();
+    }
+}
+
+<PageTitle>@Title</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="text-center mt-4">
+                <h1 class="display-1">Error @StatusCode</h1>
+                <p class="lead">@Subtitle</p>
+                <a href="/">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    Go back to the main page
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

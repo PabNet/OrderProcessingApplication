@@ -1,0 +1,102 @@
+﻿@page "/orderForm"
+
+@layout FormLayout
+
+@inherits FormLayout
+
+@inject IGenericRepository<Order> _orderRepository
+@inject IGenericRepository<Provider> _providerRepository
+
+@code
+{
+    private Order Order { get; set; } 
+    
+    private uint ProviderId { get; set; }
+    
+    private List<Provider>? Providers { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Providers = _providerRepository.Get().ToList();
+
+        Order = Id == default ? new Order {Date = DateTime.Now} : _orderRepository.Get(o => o.Id == IntegerId).First();
+        if (Order.Provider != default)
+        {
+            ProviderId = Order.Provider.Id;
+        }
+        
+        StateHasChanged();
+
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var isAddMode = Id == default;
+            var partOfTitle = ViewConstantStorage.PageParts.OrderPartOfTitle;
+
+            if (!isAddMode)
+            {
+                partOfTitle += $" №{Order?.Number}";
+            }
+
+            await InitializeFormData(isAddMode, partOfTitle);
+        }
+        
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task ProcessButtonClick()
+    {
+        await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            var provider = _providerRepository.Get(p => p.Id == ProviderId).First();
+            Order.Provider = provider;
+
+            if (_orderRepository.Get(o => o.Number == Order.Number && o.Provider?.Id == Order.Provider.Id).ToList().Count > 0)
+            {
+                throw new Exception(ViewConstantStorage.Replicas.OrderErrorDescription);
+            }
+        
+            _orderRepository.CreateOrUpdate(Order!, order => order.Id == IntegerId);
+        });
+        
+        TransferToPage(ViewConstantStorage.Pages.Orders);
+    }
+}
+
+<div class="form-floating mb-3">
+    <input class="form-control" id="inputNumber" type="number" @bind-value="@Order.Number"/>
+    <label for="inputNumber">Number</label>
+</div>
+<div class="form-floating mb-3">
+    <input id="date" type="datetime-local" class="form-control" @bind-value="@Order.Date">
+    <label for="date">Date</label>
+</div>
+<div class="form-floating mb-3">
+    <select class="form-control" id="selectProvider" @bind="@ProviderId">
+        <option value=""></option>
+        @if (Providers is not null && Providers.Count > 0)
+        {
+            @foreach (var provider in Providers)
+            {
+                if (provider.Id == Order?.Provider?.Id)
+                {
+                    <option selected value="@provider.Id">@provider.Name</option>
+                }
+                else
+                {
+                    <option value="@provider.Id">@provider.Name</option>
+                }
+            }
+        }
+    </select>
+    <label for="selectProvider">Provider</label>
+</div>
+<div class="mt-4 mb-0">
+    <div class="d-grid">
+        <a class="btn btn-dark btn-block" @onclick="ProcessButtonClick">@EventType</a>
+    </div>
+</div>

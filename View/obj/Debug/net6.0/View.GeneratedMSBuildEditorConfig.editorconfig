@@ -1,0 +1,76 @@
+is_global = true
+build_property.TargetFramework = net6.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = OrderProcessingApplication.View
+build_property.RootNamespace = OrderProcessingApplication.View
+build_property.ProjectDir = D:\Developed_Projects\Rider\OrderProcessingApplication\View\
+build_property.RazorLangVersion = 6.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = D:\Developed_Projects\Rider\OrderProcessingApplication\View
+build_property._RazorSourceGeneratorDebug = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/Error.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/OrderForm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3JkZXJGb3JtLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/OrderItemForm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3JkZXJJdGVtRm9ybS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/OrderItems.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3JkZXJJdGVtcy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/Orders.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT3JkZXJzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/ProviderForm.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvdmlkZXJGb3JtLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/Providers.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvdmlkZXJzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Shared/FormLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEZvcm1MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Shared/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Shared/TableLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFRhYmxlTGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/_Host.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX0hvc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Developed_Projects/Rider/OrderProcessingApplication/View/Pages/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX0xheW91dC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 

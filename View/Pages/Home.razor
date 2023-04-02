@@ -1,0 +1,128 @@
+﻿@page "/"
+
+@layout MainLayout
+
+@inherits MainLayout
+
+@inject IGenericRepository<Order> _orderRepository
+@inject IGenericRepository<OrderItem> _orderItemRepository
+@inject IGenericRepository<Provider> _providerRepository
+
+@code
+{
+    private string? ChartUpdatedDate;
+
+    private void GetPieChartInformation(List<string> keyList, List<string> valueList)
+    {
+        var orders = _orderRepository.Get().GroupBy(o => o.Provider?.Name);
+        foreach (var orderGroup in orders)
+        {
+            keyList.Add(orderGroup.Key!);
+            valueList.Add(orderGroup.Count().ToString());
+        }
+    }
+    
+    private void GetBarChartInformation(List<string> keyList, List<string> valueList)
+    {
+        var orders = _orderItemRepository.Get().GroupBy(o => o.Order);
+        foreach (var orderGroup in orders)
+        {
+            keyList.Add($"№{orderGroup.Key!.Number}");
+            valueList.Add(orderGroup.Count().ToString());
+        }
+    }
+    
+    private void GetLineChartInformation(List<string> keyList, List<string> valueList)
+    {
+        var orders = _orderRepository.Get(o=>o.Date >= DateTime.Now.AddDays(-7) && o.Date <= DateTime.Now)
+                                                                .GroupBy(o=>o.Date.ToString("dd.MM"))
+                                                                .OrderBy(g=>g.Key.Split('.')[1]);
+        foreach (var orderGroup in orders)
+        {
+            keyList.Add(orderGroup.Key);
+            valueList.Add(orderGroup.Count().ToString());
+        }
+    }
+
+    private (List<string> Key, List<string> Value) GetChartInformation(Action<List<string>, List<string>> chartInitialize)
+    {
+        var keyList = new List<string>();
+        var valueList = new List<string>();
+
+        chartInitialize(keyList, valueList);
+        
+        return (keyList, valueList);
+    }
+    
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ExecuteActionsAsync(ErrorType.Js, async delegate
+            {
+                var chartDelegates = new Dictionary<ChartType, Action<List<string>, List<string>>>
+                {
+                    [ChartType.Line] = GetLineChartInformation,
+                    [ChartType.Bar] = GetBarChartInformation,
+                    [ChartType.Pie] = GetPieChartInformation
+                };
+
+                foreach (var chartDelegate in chartDelegates)
+                {
+                    var chart = GetChartInformation(chartDelegate.Value);
+
+                    await InvokeJsMethod(ViewConstantStorage.JsMethods.InitializeChart,
+                        chartDelegate.Key.ToString().ToLower(),
+                        chart.Key,
+                        chart.Value);
+                }
+            });
+            
+            ChartUpdatedDate = $"Updated {DateTime.Now:dd.MM.yyyy HH:mm}";
+            
+            StateHasChanged();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}
+
+<PageTitle>Home</PageTitle>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="fas fa-chart-area me-1"></i>
+        Chart of the count of orders for the last week
+    </div>
+    <div class="card-body">
+        <canvas id="lineChart" width="100%" height="30"></canvas>
+    </div>
+    <div class="card-footer small text-muted">@ChartUpdatedDate</div>
+</div>
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-chart-bar me-1"></i>
+                Chart of count of order items
+            </div>
+            <div class="card-body">
+                <canvas id="barChart" width="100%" height="50"></canvas>
+            </div>
+            <div class="card-footer small text-muted">@ChartUpdatedDate</div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-chart-pie me-1"></i>
+                Chart of the count of orders by providers
+            </div>
+            <div class="card-body">
+                <canvas id="pieChart" width="100%" height="50"></canvas>
+            </div>
+            <div class="card-footer small text-muted">@ChartUpdatedDate</div>
+        </div>
+    </div>
+</div>

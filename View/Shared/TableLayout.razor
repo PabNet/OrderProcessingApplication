@@ -1,0 +1,51 @@
+﻿@layout MainLayout
+
+@using static DTO.Constants.ViewConstantStorage.JsMethods
+@using OrderProcessingApplication.DTO.Constants
+@using OrderProcessingApplication.DTO.Enums
+@inherits MainLayout
+
+@code {
+    protected string? NameList { get; set; }
+    protected string? FormPageName { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        (NameList, FormPageName) = await ExecuteActionsAsync(ErrorType.BrowserStorage, async delegate
+        {
+            var nameList = await GetDataFromBrowserStorage(ViewConstantStorage.BrowserStorageParameterKeys.NameList);
+            var formPageName = await GetDataFromBrowserStorage(ViewConstantStorage.BrowserStorageParameterKeys.FormPageName);
+
+            return (nameList, formPageName);
+        });
+
+        StateHasChanged();
+
+        if (firstRender)
+        {
+            await ExecuteActions(ErrorType.Js, async delegate
+            {
+                await InvokeJsMethod(InitializeDataTable);
+            });
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    
+    protected virtual async Task RemoveEntry(uint id) {}
+}
+
+<div class="container-fluid px-4">
+    <div class="card mb-4 mt-2">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            List of @NameList
+        </div>
+        @Body
+        <div class="my-4 mx-auto w-25">
+            <div class="d-grid">
+                <a class="btn btn-dark" href="@FormPageName">Add</a>
+            </div>
+        </div>
+    </div>
+</div>

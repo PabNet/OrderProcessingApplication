@@ -1,0 +1,64 @@
+﻿@layout MainLayout
+
+@inherits MainLayout
+
+@code {
+    private string? Title { get; set; }
+    protected string? EventType { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = ViewConstantStorage.Parameters.Id)]
+    public string? Id { get; set; }
+
+    protected uint IntegerId => Convert.ToUInt32(Id);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Title = await ExecuteActionsAsync(ErrorType.BrowserStorage, async delegate
+        {
+            return await GetDataFromBrowserStorage(ViewConstantStorage.BrowserStorageParameterKeys.Title);
+        });
+
+        StateHasChanged();
+    }
+
+    protected async Task InitializeFormData(bool isAddMode, string partOfTitle)
+    {
+        if (isAddMode)
+        {
+            EventType = ViewConstantStorage.PageParts.AddEvent;
+            Title = ViewConstantStorage.PageParts.AddTitle;
+        }
+        else
+        {
+            EventType = ViewConstantStorage.PageParts.UpdateEvent;
+            Title = ViewConstantStorage.PageParts.UpdateTitle;
+        }
+
+        Title = string.Format(Title, partOfTitle);
+
+        await ExecuteActionsAsync(ErrorType.BrowserStorage, async delegate
+        {
+            await SaveToBrowserStorage(ViewConstantStorage.BrowserStorageParameterKeys.Title, Title);
+        });
+    }
+    
+    protected virtual async Task ProcessButtonClick() {}
+}
+
+<PageTitle>@Title</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header"><h3 class="text-center font-weight-light my-4">@Title</h3></div>
+                <div class="card-body">
+                    <form>
+                        @Body
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

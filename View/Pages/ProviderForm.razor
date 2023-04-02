@@ -1,0 +1,57 @@
+﻿@page "/providerForm"
+
+@layout FormLayout
+
+@inherits FormLayout
+
+@inject IGenericRepository<Provider> _providerRepository
+
+@code
+{
+    private Provider? Provider { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Provider = Id == default ? new Provider() : _providerRepository.Get(o => o.Id == IntegerId).First();
+        
+        base.OnParametersSet();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var isAddMode = Id == default;
+            var partOfTitle = ViewConstantStorage.PageParts.ProviderPartOfTitle;
+
+            if (!isAddMode)
+            {
+                partOfTitle += $" {Provider?.Name}";
+            }
+
+            await InitializeFormData(isAddMode, partOfTitle);
+        }
+        
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task ProcessButtonClick()
+    {
+        await ExecuteActions(ErrorType.DataBase, delegate
+        {
+            _providerRepository.CreateOrUpdate(Provider!, provider => provider.Id == IntegerId);
+        });
+        
+        TransferToPage(ViewConstantStorage.Pages.Providers);
+    }
+}
+
+<div class="form-floating mb-3">
+    <input class="form-control" id="inputName" type="text" @bind-value="@Provider.Name"/>
+    <label for="inputName">Name</label>
+</div>
+<div class="mt-4 mb-0">
+    <div class="d-grid">
+        <a class="btn btn-dark btn-block" @onclick="ProcessButtonClick">@EventType</a>
+    </div>
+</div>

@@ -1,0 +1,236 @@
+﻿@using static OrderProcessingApplication.DTO.Constants.ViewConstantStorage.Pages
+
+@inherits LayoutComponentBase
+
+@inject IJSRuntime _js
+@inject NavigationManager _navigationManager
+@inject ProtectedSessionStorage _protectedSessionStore
+
+@code
+{
+    protected delegate T ParamsAction<out T>(params object[] oArgs);
+    protected delegate void ParamsAction(params object[] oArgs);
+    
+    private async Task InitializeSidebar()
+    {
+        await _js.InvokeVoidAsync(ViewConstantStorage.JsMethods.InitializeSidebar);
+    }
+
+    protected void TransferToPage(string page)
+    {
+        _navigationManager.NavigateTo(page);
+    }
+
+    protected string GetCurrentUri()
+    {
+        return _navigationManager.Uri;
+    }
+
+    protected async Task SaveListToBrowserStorage(Dictionary<string, string> dataMap)
+    {
+        foreach (var dataPair in dataMap)
+        {
+            await SaveToBrowserStorage(dataPair.Key, dataPair.Value);
+        }
+    }
+    
+    protected async Task SaveToBrowserStorage(string key, string value)
+    {
+        await _protectedSessionStore.SetAsync(key, value);
+    }
+
+    protected async Task<string?> GetDataFromBrowserStorage(string key)
+    {
+        return (await _protectedSessionStore.GetAsync<string>(key)).Value;
+    }
+
+    protected async Task InvokeListOfJsMethods(Dictionary<string, List<object>> methodDataMap)
+    {
+        foreach (var methodDataPair in methodDataMap)
+        {
+            await InvokeJsMethod(methodDataPair.Key, methodDataPair.Value);
+        }
+    }
+    
+    protected async Task InvokeListOfJsMethods(IEnumerable<string> methodNameList)
+    {
+        foreach (var methodName in methodNameList)
+        {
+            await InvokeJsMethod(methodName);
+        }
+    }
+
+    protected async Task InvokeJsMethod(string methodName, params object[] parameters)
+    {
+        await _js.InvokeVoidAsync(methodName, parameters);
+    }
+
+    protected async Task<T?> GetDataFromJs<T>(string methodName, params object[] parameters)
+    {
+        return await _js.InvokeAsync<T>(methodName, parameters);
+    }
+    
+    protected async Task<T> ExecuteActionsAsync<T>(ErrorType errorType, ParamsAction<Task<T>> executeQuery, params object[] parameters)
+    {
+        var result = default(T);
+        try
+        {
+            result = await executeQuery.Invoke(parameters);
+        }
+        catch (Exception ex)
+        {
+            await ShowModal(errorType, ex.Message);
+        }
+
+        return result;
+    }
+    
+    protected async Task ExecuteActionsAsync(ErrorType errorType, ParamsAction<Task> executeQuery)
+    {
+        try
+        {
+            await executeQuery.Invoke();
+        }
+        catch (Exception ex)
+        {
+            await ShowModal(errorType, ex.Message);
+        }
+    }
+
+    protected async Task<T?> ExecuteActions<T>(ErrorType errorType, ParamsAction<T> executeQuery, params object[] parameters)
+    {
+        var result = default(T);
+        try
+        {
+            result = executeQuery.Invoke(parameters);
+        }
+        catch (Exception ex)
+        {
+            await ShowModal(errorType, ex.Message);
+        }
+
+        return result;
+    }
+    
+    protected async Task<T?> ExecuteActions<T>(ErrorType errorType, ParamsAction<T> executeQuery)
+    {
+        var result = default(T);
+        try
+        {
+            result = executeQuery.Invoke();
+        }
+        catch (Exception ex)
+        {
+            await ShowModal(errorType, ex.Message);
+        }
+
+        return result;
+    }
+    
+    protected async Task ExecuteActions(ErrorType errorType, ParamsAction executeQuery, params object[] parameters)
+    {
+        try
+        {
+            executeQuery.Invoke(parameters);
+        }
+        catch (Exception ex)
+        {
+            await ShowModal(errorType, ex.Message);
+        }
+    }
+
+    protected async Task ShowModal(ErrorType errorType, string description)
+    {
+        var title = default(string);
+        switch (errorType)
+        {
+            case ErrorType.DataBase:
+            {
+                title = ViewConstantStorage.Replicas.DataBaseErrorTitle;
+                
+                break;
+            }
+            case ErrorType.Js:
+            {
+                title = ViewConstantStorage.Replicas.JsErrorTitle;
+                
+                break;
+            }
+            case ErrorType.BrowserStorage:
+            {
+                title = ViewConstantStorage.Replicas.BrowserStorageErrorTitle;
+                
+                break;
+            }
+            default:
+            {
+                title = ViewConstantStorage.Replicas.RuntimeErrorTitle;
+                
+                break;
+            }
+        }
+        
+        await InvokeJsMethod(ViewConstantStorage.JsMethods.ShowModal, title, description);
+    }
+
+    private async Task ProcessCloseModalClick()
+    {
+        await InvokeJsMethod(ViewConstantStorage.JsMethods.HideModal);
+    }
+}
+
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand ps-3">Offliner</a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" @onclick="InitializeSidebar" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+</nav>
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <a class="nav-link" @onclick="@(() => TransferToPage(Home))">
+                        <div class="sb-nav-link-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        Home
+                    </a>
+                    <a class="nav-link" @onclick="@(() => TransferToPage(Orders))">
+                        <div class="sb-nav-link-icon">
+                            <i class="fas fa-cart-arrow-down"></i>
+                        </div>
+                        Orders
+                    </a>
+                    <a class="nav-link" @onclick="@(() => TransferToPage(Providers))">
+                        <div class="sb-nav-link-icon">
+                            <i class="fas fa-user-alt"></i>
+                        </div>
+                        Providers
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div id="layoutSidenav_content">
+        <main>
+            @Body
+        </main>
+    </div>
+</div>
+
+<div id="information-modal" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modal-title"></h5>
+      </div>
+      <div class="modal-body">
+        <p id="modal-description"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="ProcessCloseModalClick">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

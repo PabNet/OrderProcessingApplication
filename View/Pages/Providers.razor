@@ -1,0 +1,91 @@
+﻿@page "/providers"
+
+@layout TableLayout
+
+@inherits TableLayout
+
+@inject IGenericRepository<Provider> _providerRepository
+
+@code
+{
+    private List<Provider>? ProviderList { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ProviderList = _providerRepository.Get().ToList();
+
+        StateHasChanged();
+        
+        NameList = ViewConstantStorage.Pages.Providers.Remove(0,1);
+        FormPageName = ViewConstantStorage.Pages.ProviderForm;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ExecuteActionsAsync(ErrorType.BrowserStorage, async delegate
+            {
+                await SaveListToBrowserStorage(new Dictionary<string, string>
+                {
+                    [ViewConstantStorage.BrowserStorageParameterKeys.NameList] = NameList!,
+                    [ViewConstantStorage.BrowserStorageParameterKeys.FormPageName] = FormPageName!
+                });
+            });
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task RemoveEntry(uint id)
+    {
+        var removingProvider = await ExecuteActions(ErrorType.DataBase,delegate
+        {
+            var provider = _providerRepository.Get(p => p.Id == id).First();
+            _providerRepository.Remove(provider);
+
+            return provider;
+        });
+        
+        ProviderList?.Remove(removingProvider!);
+        
+        StateHasChanged();
+    }
+}
+
+<PageTitle>Providers</PageTitle>
+
+<div class="card-body">
+    <table id="dataTable">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th data-sortable="false">Actions</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th data-sortable="false">Actions</th>
+        </tr>
+        </tfoot>
+        <tbody>
+        @if (ProviderList is not null && ProviderList.Count > 0)
+        {
+            @foreach (var provider in ProviderList)
+            {
+                <tr>
+                    <td>@provider.Id</td>
+                    <td>@provider.Name</td>
+                    <td>
+                    <a class="action-link" @onclick="@(()=> TransferToPage($"{ViewConstantStorage.Pages.ProviderForm}?{ViewConstantStorage.Parameters.Id}={provider.Id}"))"><i class="fas fa-edit"></i></a>
+                        <a class="action-link" @onclick="@(()=> RemoveEntry(provider.Id))"><i class="fas fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>

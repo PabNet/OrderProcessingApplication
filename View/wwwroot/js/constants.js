@@ -1,0 +1,27 @@
+const dateFilterFormat = 'YYYY-MM-DDTHH:mm',
+    chartFontFamily = '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
+    chartColor = '#292b2c',
+    modalId = '#information-modal',
+    modalTitleId = '#modal-title',
+    modalDescriptionId = '#modal-description',
+    dataTableId = '#dataTable',
+    startDateTimePickerId = '#startDate',
+    endDateTimePickerId = '#endDate',
+    multipleSelectProviderId = '#selectProvider',
+    selectCaretId = 'span.bs-caret',
+    modalShowClass = 'show',
+    navBarToggle = 'sb-sidenav-toggled',
+    toggleItem = 'sb|sidebar-toggle',
+    subtractedPartOfTheDate = 'months',
+    countOfSubtractedFromTheDate = 1,
+    lineChart = 'line',
+    pieChart = 'pie',
+    barChart = 'bar',
+    lineChartId = 'lineChart',
+    barChartId = 'barChart',
+    pieChartId = 'pieChart',
+    lineChartTitle = 'Count of orders',
+    barChartTitle = 'Count of items';
+
+
+
