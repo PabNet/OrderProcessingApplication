@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using OrderProcessingApplication.Domain.Repositories.Abstractions;
-using OrderProcessingApplication.Domain.Services;
 
 namespace OrderProcessingApplication.Domain.Repositories.Implementations
 {
@@ -60,7 +59,7 @@ namespace OrderProcessingApplication.Domain.Repositories.Implementations
                 throw new ArgumentException(nameof(predicate));
             }
             
-            return _dbSet.ToList().Where(e => predicate(e));
+            return _dbSet.ToList().Where(predicate);
         }
 
         public void Remove(TEntity? item)

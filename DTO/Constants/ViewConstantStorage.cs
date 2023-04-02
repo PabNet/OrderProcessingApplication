@@ -42,7 +42,8 @@
                 ProviderPartOfTitle = "provider",
                 OrderItemPartOfTitle = "item{0} in order №{1}",
                 OrderPartOfTitle = "order",
-                UnknownErrorTitle = "Unknown error";
+                UnknownErrorTitle = "Unknown error",
+                CountOfOrdersWithoutProviderTitle = "Without provider";
         }
 
         public static class Parameters
@@ -59,6 +60,7 @@
                 RuntimeErrorTitle = "There was a problem running the program",
                 OrderItemErrorDescription = "The name of the order item cannot be equal to the order number. Try again",
                 OrderErrorDescription = "There cannot be more than one order in the system with the same order number and provider. Try again",
+                OrderDeletionErrorDescription = "Unable to delete an order that has order items",
                 NotFoundSubtitle = "Can't find the page at the given address",
                 UnknownErrorSubtitle = "An unknown error occurred while executing the program";
         }

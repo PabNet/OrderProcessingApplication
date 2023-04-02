@@ -4,11 +4,11 @@ namespace OrderProcessingApplication.Domain.Services
 {
     public class ConfigurationService
     {
-        private IConfigurationRoot _configuration;
+        private readonly IConfigurationRoot _configuration;
 
         public ConfigurationService(IConfigurationRoot configuration)
         {
-            this._configuration = configuration;
+            _configuration = configuration;
         }
 
         public string? GetValue(string key)

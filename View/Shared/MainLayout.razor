@@ -21,11 +21,6 @@
         _navigationManager.NavigateTo(page);
     }
 
-    protected string GetCurrentUri()
-    {
-        return _navigationManager.Uri;
-    }
-
     protected async Task SaveListToBrowserStorage(Dictionary<string, string> dataMap)
     {
         foreach (var dataPair in dataMap)
@@ -139,7 +134,7 @@
         }
     }
 
-    protected async Task ShowModal(ErrorType errorType, string description)
+    private async Task ShowModal(ErrorType errorType, string description)
     {
         var title = default(string);
         switch (errorType)

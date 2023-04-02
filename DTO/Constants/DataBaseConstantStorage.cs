@@ -22,8 +22,7 @@
 
         public static class Types
         {
-            public const string IntegerColumnType = "serial",
-                StringColumnType = "varchar(100)",
+            public const string StringColumnType = "varchar(100)",
                 DecimalColumnType = "numeric(12,5)",
                 DateTimeColumnType = "timestamp";
         }

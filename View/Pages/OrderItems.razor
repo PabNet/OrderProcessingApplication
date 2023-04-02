@@ -14,7 +14,7 @@
     public string? OrderId { get; set; }
 
     private double MaxQuantity { get; set; } = 10000000000000000000;
-    private double MinQuantity { get; set; } = 0;
+    private double MinQuantity { get; set; }
 
     private uint IntegerOrderId => Convert.ToUInt32(OrderId);
 
@@ -22,7 +22,9 @@
 
     protected override void OnParametersSet()
     {
-        OrderItemList = _orderItemRepository.Get(o => o.Order.Id == IntegerOrderId && o.Quantity > MinQuantity && o.Quantity < MaxQuantity).ToList();
+        OrderItemList = _orderItemRepository.Get(o => o.Order.Id == IntegerOrderId &&
+                                                              o.Quantity > MinQuantity &&
+                                                              o.Quantity < MaxQuantity).ToList();
 
         StateHasChanged();
 

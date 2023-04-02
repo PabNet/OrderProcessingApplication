@@ -11,6 +11,7 @@ using static OrderProcessingApplication.DTO.Constants.ViewConstantStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
+
 services.AddCors();
 services.AddRazorPages();
 services.AddServerSideBlazor();

@@ -17,7 +17,7 @@
         var orders = _orderRepository.Get().GroupBy(o => o.Provider?.Name);
         foreach (var orderGroup in orders)
         {
-            keyList.Add(orderGroup.Key!);
+            keyList.Add(orderGroup.Key ?? ViewConstantStorage.PageParts.CountOfOrdersWithoutProviderTitle);
             valueList.Add(orderGroup.Count().ToString());
         }
     }
@@ -39,7 +39,7 @@
                                                                 .OrderBy(g=>g.Key.Split('.')[1]);
         foreach (var orderGroup in orders)
         {
-            keyList.Add(orderGroup.Key);
+            keyList.Add(orderGroup.Key.ToString());
             valueList.Add(orderGroup.Count().ToString());
         }
     }
@@ -68,14 +68,14 @@
                     [ChartType.Pie] = GetPieChartInformation
                 };
 
-                foreach (var chartDelegate in chartDelegates)
+                foreach (var (chartType, action) in chartDelegates)
                 {
-                    var chart = GetChartInformation(chartDelegate.Value);
+                    var (key, value) = GetChartInformation(action);
 
                     await InvokeJsMethod(ViewConstantStorage.JsMethods.InitializeChart,
-                        chartDelegate.Key.ToString().ToLower(),
-                        chart.Key,
-                        chart.Value);
+                        chartType.ToString().ToLower(),
+                        key,
+                        value);
                 }
             });
             

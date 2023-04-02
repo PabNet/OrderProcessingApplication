@@ -17,6 +17,11 @@ namespace OrderProcessingApplication.Domain.Services
             _configurationService = configurationService;
             Database.EnsureCreated();
         }
+
+        private void DeleteDataBase()
+        {
+            Database.EnsureDeleted();
+        }
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

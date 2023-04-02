@@ -11,7 +11,7 @@
 {
     private Order Order { get; set; } 
     
-    private uint ProviderId { get; set; }
+    private uint? ProviderId { get; set; }
     
     private List<Provider>? Providers { get; set; }
 
@@ -39,7 +39,7 @@
 
             if (!isAddMode)
             {
-                partOfTitle += $" №{Order?.Number}";
+                partOfTitle += $" №{Order.Number}";
             }
 
             await InitializeFormData(isAddMode, partOfTitle);
@@ -52,11 +52,16 @@
     {
         await ExecuteActions(ErrorType.DataBase, delegate
         {
-            var provider = _providerRepository.Get(p => p.Id == ProviderId).First();
-            Order.Provider = provider;
+            Order.Provider = ProviderId is not null ? _providerRepository.Get(p => p.Id == ProviderId).First() : null;
 
-            if (_orderRepository.Get(o => o.Number == Order.Number && o.Provider?.Id == Order.Provider.Id).ToList().Count > 0)
+            if (_orderRepository.Get(o => o.Number == Order.Number && 
+                                               Order.Provider is not null && 
+                                               o.Provider == Order.Provider).ToList().Count > 1)
             {
+                Order.Provider = null;
+                
+                StateHasChanged();
+                
                 throw new Exception(ViewConstantStorage.Replicas.OrderErrorDescription);
             }
         

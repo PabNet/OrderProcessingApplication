@@ -2,8 +2,8 @@ function hideUnwantedElementsOnThePage(id) {
     $(id).remove();
 }
 
-function getStep(length) {
-    return length === 0 ? 5 : length;
+function getMaxTick(data) {
+    return data.length === 0 ? 5 : Math.max.apply(null, data);
 }
 
 function getColorArray(length) {
@@ -53,7 +53,7 @@ function initializeLineChart(labels, data) {
                 yAxes: [{
                     ticks: {
                         min: 0,
-                        max: getStep(data.length),
+                        max: getMaxTick(data),
                         stepSize: 1
                     },
                     gridLines: {
@@ -103,7 +103,7 @@ function initializeBarChart(labels, data) {
                 yAxes: [{
                     ticks: {
                         min: 0,
-                        max: getStep(data.length),
+                        max: getMaxTick(data),
                         stepSize: 1
                     },
                     gridLines: {

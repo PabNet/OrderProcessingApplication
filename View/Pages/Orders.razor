@@ -5,6 +5,7 @@
 @inherits TableLayout
 
 @inject IGenericRepository<Order> _orderRepository
+@inject IGenericRepository<OrderItem> _orderItemRepository
 @inject IGenericRepository<Provider> _providerRepository
 
 @code
@@ -63,11 +64,17 @@
         var removingOrder = await ExecuteActions(ErrorType.DataBase, delegate
         {
             var order = _orderRepository.Get(o => o.Id == id).First();
-            _orderRepository.CreateOrUpdate(order!, o => order.Id == id);
+
+            if (_orderItemRepository.Get(o => o.Order == order).Any())
+            {
+                throw new Exception(ViewConstantStorage.Replicas.OrderDeletionErrorDescription);
+            }
+            
+            _orderRepository.Remove(order);
 
             return order;
         });
-        
+
         OrderList?.Remove(removingOrder!);
 
         StateHasChanged();
@@ -78,9 +85,9 @@
         return await ExecuteActions(ErrorType.DataBase, delegate
         {
             return _orderRepository.Get(o => o.Date > StartDate &&
-                                                  o.Date < EndDate && 
-                                                  (SelectedProviderIds.Count == default || SelectedProviderIds.Any(p=>p == o.Provider?.Id)))
-                                    .ToList();
+                                             o.Date < EndDate &&
+                                             (SelectedProviderIds.Count == default || SelectedProviderIds.Any(p => p == o.Provider?.Id)))
+                .ToList();
         });
     }
 
@@ -116,7 +123,7 @@
     {
         if (selectedProviders is not null)
         {
-            SelectedProviderIds = selectedProviders.Select(s=>Convert.ToUInt32(s)).ToList();
+            SelectedProviderIds = selectedProviders.Select(s => Convert.ToUInt32(s)).ToList();
 
             OrderList = await GetOrderListWithFilters();
 
@@ -175,11 +182,11 @@
         {
             @foreach (var order in OrderList)
             {
-                <tr class="orderRow" @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={order.Id}"))">
-                    <td>@order.Id</td>
-                    <td>@order.Number</td>
-                    <td>@order.Date</td>
-                    <td>@order.Provider?.Name</td>
+                <tr class="orderRow">
+                    <td @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={order.Id}"))">@order.Id</td>
+                    <td @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={order.Id}"))">@order.Number</td>
+                    <td @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={order.Id}"))">@order.Date</td>
+                    <td @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderItems}?{ViewConstantStorage.Parameters.OrderId}={order.Id}"))">@order.Provider?.Name</td>
                     <td>
                         <a class="action-link" @onclick="@(() => TransferToPage($"{ViewConstantStorage.Pages.OrderForm}?{ViewConstantStorage.Parameters.Id}={order.Id}"))">
                             <i class="fas fa-edit"></i>
